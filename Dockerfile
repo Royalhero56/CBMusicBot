@@ -1,25 +1,30 @@
-# Use latest stable Python image (Debian 12 Bookworm)
+# ✅ Latest stable Python with active Debian version
 FROM python:3.12-slim-bookworm
 
-# Prevent interactive prompts
+# Disable interactive mode
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Update & install dependencies
-RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y git curl ffmpeg && \
-    rm -rf /var/lib/apt/lists/*
+# ✅ Update & install all required system dependencies
+RUN apt-get update && apt-get install -y \
+    git curl ffmpeg gcc g++ make \
+    libssl-dev libffi-dev python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install latest Node.js (LTS)
+# ✅ Install Node.js (LTS version)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
     apt-get install -y nodejs && \
     npm install -g npm@latest
 
-# Set up app directory
+# ✅ Set up app directory
 WORKDIR /app
 COPY . /app/
 
-# Install Python dependencies
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# ✅ Upgrade pip and install Python packages
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install -r requirements.txt
 
-# Start the bot
+# ✅ Optional: clean cache to reduce image size
+RUN apt-get clean && rm -rf /root/.cache/pip
+
+# ✅ Start the bot automatically
 CMD ["python", "main.py"]
